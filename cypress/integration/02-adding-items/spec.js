@@ -10,43 +10,79 @@ it('loads', () => {
 // IMPORTANT ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
 
 it('adds two items', () => {
-  // repeat twice
-  //    get the input field
-  //    type text and "enter"
-  //    assert that the new Todo item
-  //    has been added added to the list
+  // get the input field and type text and "enter"
+  cy.get('input.new-todo').type('Item1{enter}')
+  // assert that the new Todo item has been added added to the list
+  cy.contains('li.todo', 'Item1')
+  cy.get('input.new-todo').type('Item2{enter}')
+  cy.contains('li.todo', 'Item2')
   // cy.get(...).should('have.length', 2)
+  cy.get('ul.todo-list > li').should('have.length', 2)
 })
 
 it('can mark an item as completed', () => {
   // adds a few items
+  cy.get('input.new-todo').type('Item3{enter}')
+  cy.get('input.new-todo').type('Item4{enter}')
   // marks the first item as completed
+  cy.get('ul.todo-list > li').first().find('input.toggle').check()
+
   // confirms the first item has the expected completed class
   // confirms the other items are still incomplete
+  cy.get('ul.todo-list > li').then((listItems) => {
+    for (let i = 0; i < listItems.length; i++) {
+      if (i == 0) {
+        cy.get(listItems[i]).should('have.class', 'completed')
+      } else {
+        cy.get(listItems[i]).should('not.have.class', 'completed')
+      }
+    }
+  })
 })
 
 it('can delete an item', () => {
-  // adds a few items
   // deletes the first item
   // use force: true because we don't want to hover
-  // confirm the deleted item is gone from the dom
-  // confirm the other item still exists
+  cy.get('ul.todo-list > li').then((listItems) => {
+    const itemsLength = listItems.length
+
+    cy.get(listItems[0]).find('.destroy').click({ force: true })
+    // confirm the deleted item is gone from the dom
+    // and also confirm the other item still exists
+    cy.get(listItems).should('have.length', itemsLength - 1)
+  })
 })
 
 it('can add many items', () => {
-  const N = 5
-  for (let k = 0; k < N; k += 1) {
-    // add an item
-    // probably want to have a reusable function to add an item!
-  }
-  // check number of items
+  let listItems,
+    itemsLength,
+    N = null
+  cy.get('ul.todo-list > li')
+    .then((gotListItems) => {
+      listItems = gotListItems
+      itemsLength = listItems.length
+      N = 5
+      for (let k = 0; k < N; k += 1) {
+        cy.get('input.new-todo').type(`Programmatic Item ${k + 1}{enter}`)
+        // probably want to have a reusable function to add an item!
+      }
+    })
+    .then(() => {
+      // check number of items
+      cy.get('ul.todo-list > li').should('have.length', N + itemsLength)
+    })
 })
 
 it('adds item with random text', () => {
   // use a helper function with Math.random()
+  const randomText = Math.random().toString().slice(2, 14)
+  cy.get('input.new-todo').type(`Random Item ${randomText}{enter}`)
   // or Cypress._.random() to generate unique text label
   // add such item
   // and make sure it is visible and does not have class "completed"
+  cy.contains(randomText)
+    .should('be.visible')
+    .and('not.have.class', 'completed')
 })
 
 it('starts with zero items', () => {
@@ -55,16 +91,30 @@ it('starts with zero items', () => {
   //   in the list
   //   use cy.get(...) and it should have length of 0
   //   https://on.cypress.io/get
+  cy.get('ul.todo-list > li').then((listItems) => {
+    if (listItems.length > 0) {
+      for (let i = 0; i < listItems.length; i++) {
+        cy.get(listItems[i]).find('.destroy').click({ force: true })
+      }
+    }
+  })
 })
 
 it('does not allow adding blank todos', () => {
   // https://on.cypress.io/catalog-of-events#App-Events
-  cy.on('uncaught:exception', () => {
+  cy.on('uncaught:exception', (e) => {
     // check e.message to match expected error text
     // return false if you want to ignore the error
+    const isBlankTodo = e.message.includes('Cannot add a blank todo')
+    console.log('isBlankTodo: ', isBlankTodo)
+
+    if (isBlankTodo) {
+      return false
+    }
   })
 
   // try adding an item with just spaces
+  cy.get('input.new-todo').type(' {enter}')
 })
 
 // what a challenge?
