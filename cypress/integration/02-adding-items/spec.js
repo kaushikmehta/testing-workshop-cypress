@@ -1,6 +1,10 @@
 /// <reference types="cypress" />
-it('loads', () => {
-  // application should be running at port 3000
+
+const addItem = (text) => {
+  cy.get('input.new-todo').type(`${text}{enter}`)
+}
+
+before(() => {
   cy.visit('localhost:3000')
   cy.contains('h1', 'todos')
 })
@@ -11,10 +15,10 @@ it('loads', () => {
 
 it('adds two items', () => {
   // get the input field and type text and "enter"
-  cy.get('input.new-todo').type('Item1{enter}')
+  addItem('Item1')
   // assert that the new Todo item has been added added to the list
   cy.contains('li.todo', 'Item1')
-  cy.get('input.new-todo').type('Item2{enter}')
+  addItem('Item2')
   cy.contains('li.todo', 'Item2')
   // cy.get(...).should('have.length', 2)
   cy.get('ul.todo-list > li').should('have.length', 2)
@@ -22,8 +26,8 @@ it('adds two items', () => {
 
 it('can mark an item as completed', () => {
   // adds a few items
-  cy.get('input.new-todo').type('Item3{enter}')
-  cy.get('input.new-todo').type('Item4{enter}')
+  addItem('Item3')
+  addItem('Item4')
   // marks the first item as completed
   cy.get('ul.todo-list > li').first().find('input.toggle').check()
 
@@ -76,7 +80,7 @@ it('can add many items', () => {
 it('adds item with random text', () => {
   // use a helper function with Math.random()
   const randomText = Math.random().toString().slice(2, 14)
-  cy.get('input.new-todo').type(`Random Item ${randomText}{enter}`)
+  addItem(`Random Item ${randomText}`)
   // or Cypress._.random() to generate unique text label
   // add such item
   // and make sure it is visible and does not have class "completed"
@@ -98,6 +102,7 @@ it('starts with zero items', () => {
       }
     }
   })
+  cy.get('ul.todo-list > li').should('have.length', 0)
 })
 
 it('does not allow adding blank todos', () => {
@@ -114,7 +119,7 @@ it('does not allow adding blank todos', () => {
   })
 
   // try adding an item with just spaces
-  cy.get('input.new-todo').type(' {enter}')
+  addItem(' ')
 })
 
 // what a challenge?
