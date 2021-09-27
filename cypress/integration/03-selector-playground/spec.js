@@ -10,18 +10,18 @@ it('loads', () => {
   cy.contains('h1', 'todos')
 })
 // optional test data attribute selector helper
-// const tid = id => `[data-cy="${id}"]`
+const tid = (id) => `[data-cy="${id}"]`
 /**
  * Adds a todo item
  * @param {string} text
  */
 const addItem = (text) => {
-  // write Cy commands here to add the new item
+  cy.get(tid('input')).type(`${text}{enter}`)
 }
 it('adds two items', () => {
   addItem('first item')
   addItem('second item')
   // fill the selector
   // maybe use "tid" function
-  cy.get('...').should('have.length', 2)
+  cy.get(tid('item')).should('have.length', 2)
 })
