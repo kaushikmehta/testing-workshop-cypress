@@ -42,6 +42,7 @@
         <h1 data-cy="app-title">todos</h1>
         <input
           class="new-todo"
+          data-cy="input"
           autofocus
           autocomplete="off"
           placeholder="What needs to be done?"
@@ -53,6 +54,7 @@
       <section class="main" v-show="todos.length" v-cloak>
         <ul class="todo-list">
           <li
+            data-cy="item"
             v-for="todo in todos"
             class="todo"
             :key="todo.id"
